@@ -34,8 +34,7 @@ public class JPAManagerImpl<E> implements Manager<E> {
     @Override
     public E create() {
         try {
-            E entity = entityClass.newInstance();
-            return entity;
+            return entityClass.newInstance();
         } catch (InstantiationException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
@@ -52,6 +51,17 @@ public class JPAManagerImpl<E> implements Manager<E> {
         E merged = em.merge(entity);
         em.getTransaction().commit();
         return merged;
+    }
+
+    @Override
+    public void commit(List<E> entities) {
+        EntityManager em = getEntityManager();
+        em.getTransaction().begin();
+        for( E entity: entities ){
+            em.merge(entity);
+        }
+        em.getTransaction().commit();
+
     }
 
     @Override
