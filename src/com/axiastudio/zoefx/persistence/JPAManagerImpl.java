@@ -65,7 +65,6 @@ public class JPAManagerImpl<E> implements Manager<E> {
         em.getTransaction().begin();
         em.createQuery("DELETE FROM " + entityClass.getCanonicalName() + " e").executeUpdate();
         em.getTransaction().commit();
-        em.close();
     }
 
     @Override
