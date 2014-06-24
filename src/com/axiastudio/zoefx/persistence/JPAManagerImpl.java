@@ -5,16 +5,12 @@ import com.axiastudio.zoefx.core.db.Manager;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * User: tiziano
@@ -89,6 +85,40 @@ public class JPAManagerImpl<E> implements Manager<E> {
         CriteriaQuery<E> cq = cb.createQuery(entityClass);
         Root<E> root = cq.from(entityClass);
         cq.select(root);
+        TypedQuery<E> query = em.createQuery(cq);
+        List<E> store = query.getResultList();
+        return store;
+    }
+
+    @Override
+    public List<E> query(Map<String, Object> map) {
+        EntityManager em = getEntityManager();
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<E> cq = cb.createQuery(entityClass);
+        Root<E> root = cq.from(entityClass);
+        List<Predicate> predicates = new ArrayList<>();
+        for( String name: map.keySet() ){
+            Predicate predicate=null;
+            Path path = null;
+            path = root.get(name);
+            Object objectValue = map.get(name);
+            if( objectValue instanceof String ){
+                String value = (String) objectValue;
+                value = value.replace("*", "%");
+                if( !value.endsWith("%") ){
+                    value += "%";
+                }
+                predicate = cb.like(cb.upper(path), value.toUpperCase());
+            }
+            if( predicate != null ){
+                predicates.add(predicate);
+            }
+        }
+
+        cq.select(root);
+        if( predicates.size()>0 ){
+            cq.where(cb.and(predicates.toArray(new Predicate[predicates.size()])));
+        }
         TypedQuery<E> query = em.createQuery(cq);
         List<E> store = query.getResultList();
         return store;
