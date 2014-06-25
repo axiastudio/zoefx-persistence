@@ -109,6 +109,13 @@ public class JPAManagerImpl<E> implements Manager<E> {
                     value += "%";
                 }
                 predicate = cb.like(cb.upper(path), value.toUpperCase());
+            } else if( objectValue instanceof Object ){
+                if( objectValue.getClass().isEnum() ) {
+                    int value = ((Enum) objectValue).ordinal(); // XXX: and if EnumType.STRING??
+                    predicate = cb.equal(path, value);
+                } else {
+                    predicate = cb.equal(path, objectValue);
+                }
             }
             if( predicate != null ){
                 predicates.add(predicate);
