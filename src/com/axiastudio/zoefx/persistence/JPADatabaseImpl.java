@@ -5,6 +5,7 @@ import com.axiastudio.zoefx.core.db.Manager;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import java.util.Map;
 
 /**
  * User: tiziano
@@ -28,6 +29,17 @@ public class JPADatabaseImpl implements Database {
     @Override
     public void open(String persistenceUnit) {
         this.entityManagerFactory = Persistence.createEntityManagerFactory(persistenceUnit);
+    }
+    /**
+     * Initialize the entity manager factory.
+     *
+     * @param persistenceUnit The persistence unit defined in persistence.xml
+     * @param properties Properties in overriding
+     *
+     */
+    @Override
+    public void open(String persistenceUnit, Map<String, String> properties) {
+        this.entityManagerFactory = Persistence.createEntityManagerFactory(persistenceUnit, properties);
     }
 
     /**
