@@ -1,8 +1,11 @@
 package com.axiastudio.zoefx.persistence;
 
+import com.axiastudio.zoefx.core.Utilities;
 import com.axiastudio.zoefx.core.beans.BeanAccess;
+import com.axiastudio.zoefx.core.beans.BeanClassAccess;
 import com.axiastudio.zoefx.core.db.DataSet;
 import com.axiastudio.zoefx.core.db.DataSetBuilder;
+import com.axiastudio.zoefx.core.db.Database;
 import com.axiastudio.zoefx.core.db.Manager;
 
 import javax.persistence.EntityManager;
@@ -39,6 +42,15 @@ public class JPAManagerImpl<E> implements Manager<E> {
             e.printStackTrace();
         }
         return null;
+    }
+
+    @Override
+    public Object createRow(String collectionName) {
+        Database db = Utilities.queryUtility(Database.class);
+        BeanClassAccess beanClassAccess = new BeanClassAccess(entityClass, collectionName);
+        Class<?> genericReturnType = beanClassAccess.getGenericReturnType();
+        Manager<?> manager = db.createManager(genericReturnType);
+        return manager.create();
     }
 
     @Override
