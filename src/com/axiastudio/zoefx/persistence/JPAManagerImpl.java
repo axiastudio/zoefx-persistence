@@ -132,6 +132,12 @@ public class JPAManagerImpl<E> implements Manager<E> {
                     value += "%";
                 }
                 predicate = cb.like(cb.upper(path), value.toUpperCase());
+            } else if( objectValue instanceof Boolean ){
+                predicate = cb.equal(path, objectValue);
+            } else if( objectValue instanceof List ){
+                List<Date> range = (List<Date>) objectValue;
+                predicate = cb.and(cb.greaterThanOrEqualTo(path, range.get(0)),
+                        cb.lessThan(path, range.get(1)));
             } else if( objectValue instanceof Object ){
                 if( objectValue.getClass().isEnum() ) {
                     int value = ((Enum) objectValue).ordinal(); // XXX: and if EnumType.STRING??
