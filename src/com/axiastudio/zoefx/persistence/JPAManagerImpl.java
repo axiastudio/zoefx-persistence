@@ -3,8 +3,6 @@ package com.axiastudio.zoefx.persistence;
 import com.axiastudio.zoefx.core.Utilities;
 import com.axiastudio.zoefx.core.beans.BeanAccess;
 import com.axiastudio.zoefx.core.beans.BeanClassAccess;
-import com.axiastudio.zoefx.core.db.DataSet;
-import com.axiastudio.zoefx.core.db.DataSetBuilder;
 import com.axiastudio.zoefx.core.db.Database;
 import com.axiastudio.zoefx.core.db.Manager;
 
@@ -102,7 +100,7 @@ public class JPAManagerImpl<E> implements Manager<E> {
     }
 
     @Override
-    public DataSet<E> getAll() {
+    public List<E> getAll() {
         EntityManager em = getEntityManager();
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<E> cq = cb.createQuery(entityClass);
@@ -110,11 +108,11 @@ public class JPAManagerImpl<E> implements Manager<E> {
         cq.select(root);
         TypedQuery<E> query = em.createQuery(cq);
         List<E> store = query.getResultList();
-        return DataSetBuilder.create(entityClass).store(store).manager(this).build();
+        return store;
     }
 
     @Override
-    public DataSet<E> query(Map<String, Object> map) {
+    public List<E> query(Map<String, Object> map) {
         EntityManager em = getEntityManager();
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<E> cq = cb.createQuery(entityClass);
@@ -157,7 +155,7 @@ public class JPAManagerImpl<E> implements Manager<E> {
         }
         TypedQuery<E> query = em.createQuery(cq);
         List<E> store = query.getResultList();
-        return DataSetBuilder.create(entityClass).store(store).manager(this).build();
+        return store;
     }
 
     private EntityManager getEntityManager() {
