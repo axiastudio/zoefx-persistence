@@ -80,10 +80,8 @@ public class JPAManagerImpl<E> implements Manager<E> {
     @Override
     public void deleteRow(Object row) {
         EntityManager em = getEntityManager();
-        em.getTransaction().begin();
         Object merged = em.merge(row);
         em.remove(merged);
-        em.getTransaction().commit();
     }
 
     @Override
