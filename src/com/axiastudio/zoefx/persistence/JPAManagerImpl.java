@@ -94,7 +94,8 @@ public class JPAManagerImpl<E> implements Manager<E> {
 
     @Override
     public E get(Long id) {
-        return null;
+        EntityManager em = getEntityManager();
+        return em.find(entityClass, id);
     }
 
     @Override
