@@ -69,12 +69,14 @@ public class JPAManagerImpl<E> implements Manager<E> {
             em.merge(entity);
         }
         em.getTransaction().commit();
-
     }
 
     @Override
     public void delete(E entity) {
-
+        EntityManager em = getEntityManager();
+        em.getTransaction().begin();
+        em.remove(entity);
+        em.getTransaction().commit();
     }
 
     @Override
