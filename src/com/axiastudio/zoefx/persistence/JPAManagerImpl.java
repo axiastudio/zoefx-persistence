@@ -75,7 +75,8 @@ public class JPAManagerImpl<E> implements Manager<E> {
     public void delete(E entity) {
         EntityManager em = getEntityManager();
         em.getTransaction().begin();
-        em.remove(entity);
+        E merged = em.merge(entity);
+        em.remove(merged);
         em.getTransaction().commit();
     }
 
