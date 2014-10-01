@@ -136,8 +136,10 @@ public class JPAManagerImpl<E> implements Manager<E> {
                 predicate = cb.equal(path, objectValue);
             } else if( objectValue instanceof List ){
                 List<Date> range = (List<Date>) objectValue;
-                predicate = cb.and(cb.greaterThanOrEqualTo(path, range.get(0)),
-                        cb.lessThan(path, range.get(1)));
+                Date from = zeroMilliseconds(range.get(0));
+                Date to = lastMillisecond(range.get(1));
+                predicate = cb.and(cb.greaterThanOrEqualTo(path, from),
+                        cb.lessThanOrEqualTo(path, to));
             } else if( objectValue instanceof Object ){
                 if( objectValue.getClass().isEnum() ) {
                     int value = ((Enum) objectValue).ordinal(); // XXX: and if EnumType.STRING??
@@ -158,6 +160,26 @@ public class JPAManagerImpl<E> implements Manager<E> {
         TypedQuery<E> query = em.createQuery(cq);
         List<E> store = query.getResultList();
         return store;
+    }
+
+    private Date zeroMilliseconds(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTime();
+    }
+
+    private Date lastMillisecond(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        calendar.set(Calendar.MILLISECOND, 999);
+        return calendar.getTime();
     }
 
     private EntityManager getEntityManager() {
