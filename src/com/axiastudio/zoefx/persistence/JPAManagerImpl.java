@@ -1,8 +1,8 @@
 package com.axiastudio.zoefx.persistence;
 
 import com.axiastudio.zoefx.core.Utilities;
-import com.axiastudio.zoefx.core.beans.BeanAccess;
-import com.axiastudio.zoefx.core.beans.BeanClassAccess;
+import com.axiastudio.zoefx.core.model.beans.BeanAccess;
+import com.axiastudio.zoefx.core.model.beans.BeanClassAccess;
 import com.axiastudio.zoefx.core.db.Database;
 import com.axiastudio.zoefx.core.db.Manager;
 
