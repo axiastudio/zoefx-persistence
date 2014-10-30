@@ -3,6 +3,7 @@ package com.axiastudio.zoefx.persistence;
 import com.axiastudio.zoefx.core.db.Database;
 import com.axiastudio.zoefx.core.db.Manager;
 
+import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import java.util.Map;
@@ -51,6 +52,21 @@ public class JPADatabaseImpl implements Database {
     @Override
     public <E> Manager<E> createManager(Class<E> klass){
         JPAManagerImpl<E> manager = new JPAManagerImpl(getEntityManagerFactory().createEntityManager(), klass);
+        return manager;
+    }
+
+    /**
+     * Create a controller for the entities of the given class, using the same EntityManager
+     *
+     * @param klass The class managed from the controller
+     * @param parentManager The parent manager
+     *
+     */
+    @Override
+    public <E> Manager<E> createManager(Class<E> klass, Manager<?> parentManager) {
+        JPAManagerImpl parentJpaManager = (JPAManagerImpl) parentManager;
+        EntityManager entityManager = parentJpaManager.getEntityManager();
+        JPAManagerImpl<E> manager = new JPAManagerImpl(entityManager, klass);
         return manager;
     }
 }

@@ -182,7 +182,7 @@ public class JPAManagerImpl<E> implements Manager<E> {
         return calendar.getTime();
     }
 
-    private EntityManager getEntityManager() {
+    protected EntityManager getEntityManager() {
         return entityManager;
     }
 
