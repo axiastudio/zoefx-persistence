@@ -79,7 +79,7 @@ public class JPAManagerImpl<E> implements Manager<E> {
     }
 
     @Override
-    public E commit(E entity) {
+    public E save(E entity) {
         parentize(entity);
         EntityManager em = getEntityManager();
         em.getTransaction().begin();
@@ -89,7 +89,7 @@ public class JPAManagerImpl<E> implements Manager<E> {
     }
 
     @Override
-    public void commit(List<E> entities) {
+    public void save(List<E> entities) {
         EntityManager em = getEntityManager();
         em.getTransaction().begin();
         for( E entity: entities ){
