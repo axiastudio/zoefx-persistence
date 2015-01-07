@@ -142,7 +142,7 @@ public class JPAManagerImpl<E> extends AbstractManager<E> implements Manager<E> 
     }
 
     @Override
-    public List<E> query(Map<String, Object> map, List<String> orderbys, List<Boolean> reverses, Long limit) {
+    public List<E> query(Map<String, Object> map, List<String> orderbys, List<Boolean> reverses, Integer limit) {
         EntityManager em = getEntityManager();
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<E> cq = cb.createQuery(entityClass);

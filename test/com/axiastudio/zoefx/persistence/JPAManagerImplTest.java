@@ -65,7 +65,7 @@ public class JPAManagerImplTest {
         Database db = Utilities.queryUtility(Database.class);
         Manager<Author> manager = db.createManager(Author.class);
         assert manager.query().size() == 3;
-        assert manager.query(2L).size() == 2;
+        assert manager.query(2).size() == 2;
     }
 
     @Test
@@ -73,7 +73,7 @@ public class JPAManagerImplTest {
         Database db = Utilities.queryUtility(Database.class);
         Manager<Author> manager = db.createManager(Author.class);
         assert "Gabriel García".equals(manager.query("name").get(0).name);
-        assert "Tolstoj".equals(manager.query("surname", Boolean.TRUE, 1L).get(0).surname);
+        assert "Tolstoj".equals(manager.query("surname", Boolean.TRUE, 1).get(0).surname);
     }
 
 }
