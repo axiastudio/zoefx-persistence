@@ -142,7 +142,7 @@ public class JPAManagerImpl<E> extends AbstractManager<E> implements Manager<E> 
     }
 
     @Override
-    public List<E> query(Map<String, Object> map, List<String> orderby, Boolean reverse, Long limit) {
+    public List<E> query(Map<String, Object> map, List<String> orderbys, List<Boolean> reverses, Long limit) {
         EntityManager em = getEntityManager();
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<E> cq = cb.createQuery(entityClass);
@@ -187,10 +187,26 @@ public class JPAManagerImpl<E> extends AbstractManager<E> implements Manager<E> 
         }
 
         // order by
-
-        // limit
+        if( orderbys.size()>0 ) {
+            List<Order> orders = new ArrayList<>();
+            for (int i = 0; i < orderbys.size(); i++) {
+                String orderby = orderbys.get(i);
+                Boolean reverse = reverses.get(i);
+                if (reverse) {
+                    orders.add(cb.desc(root.get(orderby)));
+                } else {
+                    orders.add(cb.asc(root.get(orderby)));
+                }
+            }
+            cq.orderBy(orders);
+        }
 
         TypedQuery<E> query = em.createQuery(cq);
+
+        // limit
+        if( limit != null ){
+            query = query.setMaxResults(limit.intValue());
+        }
         List<E> store = query.getResultList();
         return store;
     }

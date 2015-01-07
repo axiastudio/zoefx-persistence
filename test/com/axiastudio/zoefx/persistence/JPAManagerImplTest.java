@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, AXIA Studio (Tiziano Lattisi) - http://www.axiastudio.com
+ * Copyright (c) 2015, AXIA Studio (Tiziano Lattisi) - http://www.axiastudio.com
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,25 +29,51 @@ package com.axiastudio.zoefx.persistence;
 
 import com.axiastudio.zoefx.core.Utilities;
 import com.axiastudio.zoefx.core.db.Database;
+import com.axiastudio.zoefx.core.db.Manager;
+import com.axiastudio.zoefx.core.model.beans.EntityBuilder;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-/**
- * User: tiziano
- * Date: 18/03/14
- * Time: 21:25
- */
-public class JPADatabaseImplTest {
+import static org.junit.Assert.*;
+
+public class JPAManagerImplTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
         JPADatabaseImpl db = new JPADatabaseImpl();
+        db.open("testPU");
         Utilities.registerUtility(db, Database.class);
+        Manager<Author> manager = db.createManager(Author.class);
+        Author lev = EntityBuilder.create(Author.class).set("id", 1L).set("name", "Lev").set("surname", "Tolstoj").build();
+        manager.save(lev);
+        Author hesse = EntityBuilder.create(Author.class).set("id", 2L).set("name", "Hermann").set("surname", "Hesse").build();
+        manager.save(hesse);
+        Author gabriel = EntityBuilder.create(Author.class).set("id", 3L).set("name", "Gabriel García").set("surname", "Márquez").build();
+        manager.save(gabriel);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        Database db = Utilities.queryUtility(Database.class);
+        Manager<Author> manager = db.createManager(Author.class);
     }
 
     @Test
-    public void testRegisterUtility() throws Exception {
+    public void testLimit() throws Exception {
         Database db = Utilities.queryUtility(Database.class);
+        Manager<Author> manager = db.createManager(Author.class);
+        assert manager.query().size() == 3;
+        assert manager.query(2L).size() == 2;
+    }
+
+    @Test
+    public void testOderBy() throws Exception {
+        Database db = Utilities.queryUtility(Database.class);
+        Manager<Author> manager = db.createManager(Author.class);
+        assert "Gabriel García".equals(manager.query("name").get(0).name);
+        assert "Tolstoj".equals(manager.query("surname", Boolean.TRUE, 1L).get(0).surname);
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, AXIA Studio (Tiziano Lattisi) - http://www.axiastudio.com
+ * Copyright (c) 2015, AXIA Studio (Tiziano Lattisi) - http://www.axiastudio.com
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,27 +27,21 @@
 
 package com.axiastudio.zoefx.persistence;
 
-import com.axiastudio.zoefx.core.Utilities;
-import com.axiastudio.zoefx.core.db.Database;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
 
 /**
  * User: tiziano
- * Date: 18/03/14
- * Time: 21:25
+ * Date: 07/01/15
+ * Time: 21:50
  */
-public class JPADatabaseImplTest {
-
-    @BeforeClass
-    public static void setUpClass() throws Exception {
-        JPADatabaseImpl db = new JPADatabaseImpl();
-        Utilities.registerUtility(db, Database.class);
-    }
-
-    @Test
-    public void testRegisterUtility() throws Exception {
-        Database db = Utilities.queryUtility(Database.class);
-    }
-
+@Entity
+public class Author {
+    @Id
+    public Long id;
+    @Column
+    public String name;
+    @Column
+    public String surname;
 }
