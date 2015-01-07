@@ -28,6 +28,7 @@
 package com.axiastudio.zoefx.persistence;
 
 import com.axiastudio.zoefx.core.Utilities;
+import com.axiastudio.zoefx.core.db.AbstractManager;
 import com.axiastudio.zoefx.core.model.beans.BeanAccess;
 import com.axiastudio.zoefx.core.model.beans.BeanClassAccess;
 import com.axiastudio.zoefx.core.db.Database;
@@ -47,7 +48,7 @@ import java.util.*;
  * Date: 18/03/14
  * Time: 20:50
  */
-public class JPAManagerImpl<E> implements Manager<E> {
+public class JPAManagerImpl<E> extends AbstractManager<E> implements Manager<E> {
 
     private Class<E> entityClass;
     private EntityManager entityManager;
@@ -129,7 +130,7 @@ public class JPAManagerImpl<E> implements Manager<E> {
     }
 
     @Override
-    public List<E> getAll() {
+    public List<E> query() {
         EntityManager em = getEntityManager();
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<E> cq = cb.createQuery(entityClass);
@@ -141,7 +142,7 @@ public class JPAManagerImpl<E> implements Manager<E> {
     }
 
     @Override
-    public List<E> query(Map<String, Object> map) {
+    public List<E> query(Map<String, Object> map, List<String> orderby, Boolean reverse, Long limit) {
         EntityManager em = getEntityManager();
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<E> cq = cb.createQuery(entityClass);
@@ -184,6 +185,11 @@ public class JPAManagerImpl<E> implements Manager<E> {
         if( predicates.size()>0 ){
             cq.where(cb.and(predicates.toArray(new Predicate[predicates.size()])));
         }
+
+        // order by
+
+        // limit
+
         TypedQuery<E> query = em.createQuery(cq);
         List<E> store = query.getResultList();
         return store;
