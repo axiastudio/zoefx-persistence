@@ -36,6 +36,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.util.List;
+
 import static org.junit.Assert.*;
 
 public class JPAManagerImplTest {
@@ -74,6 +76,19 @@ public class JPAManagerImplTest {
         Manager<Author> manager = db.createManager(Author.class);
         assert "Gabriel García".equals(manager.query("name").get(0).name);
         assert "Tolstoj".equals(manager.query("surname", Boolean.TRUE, 1).get(0).surname);
+    }
+
+    @Test
+    public void testPaging() throws Exception {
+        Database db = Utilities.queryUtility(Database.class);
+        Manager<Author> manager = db.createManager(Author.class);
+        List<Author> rs = manager.query("id", 2, 2); // second page (page size is 2)
+        /*
+         *  1st page: Tolstoj, Hesse
+         *  2nd page: Márquez
+         */
+        assert rs.size()==1;
+        assert "Márquez".equals(rs.get(0).surname);
     }
 
 }
