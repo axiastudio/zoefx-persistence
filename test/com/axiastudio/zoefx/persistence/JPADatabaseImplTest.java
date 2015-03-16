@@ -27,7 +27,7 @@
 
 package com.axiastudio.zoefx.persistence;
 
-import com.axiastudio.zoefx.core.Utilities;
+import com.axiastudio.zoefx.core.IOC;
 import com.axiastudio.zoefx.core.db.Database;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -42,12 +42,12 @@ public class JPADatabaseImplTest {
     @BeforeClass
     public static void setUpClass() throws Exception {
         JPADatabaseImpl db = new JPADatabaseImpl();
-        Utilities.registerUtility(db, Database.class);
+        IOC.registerUtility(db, Database.class);
     }
 
     @Test
     public void testRegisterUtility() throws Exception {
-        Database db = Utilities.queryUtility(Database.class);
+        Database db = IOC.queryUtility(Database.class);
     }
 
 }

@@ -27,7 +27,7 @@
 
 package com.axiastudio.zoefx.persistence;
 
-import com.axiastudio.zoefx.core.Utilities;
+import com.axiastudio.zoefx.core.IOC;
 import com.axiastudio.zoefx.core.db.AbstractManager;
 import com.axiastudio.zoefx.core.model.beans.BeanAccess;
 import com.axiastudio.zoefx.core.model.beans.BeanClassAccess;
@@ -72,7 +72,7 @@ public class JPAManagerImpl<E> extends AbstractManager<E> implements Manager<E> 
 
     @Override
     public Object createRow(String collectionName) {
-        Database db = Utilities.queryUtility(Database.class);
+        Database db = IOC.queryUtility(Database.class);
         BeanClassAccess beanClassAccess = new BeanClassAccess(entityClass, collectionName);
         Class<?> genericReturnType = beanClassAccess.getGenericReturnType();
         Manager<?> manager = db.createManager(genericReturnType);

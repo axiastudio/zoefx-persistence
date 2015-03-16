@@ -27,18 +27,15 @@
 
 package com.axiastudio.zoefx.persistence;
 
-import com.axiastudio.zoefx.core.Utilities;
+import com.axiastudio.zoefx.core.IOC;
 import com.axiastudio.zoefx.core.db.Database;
 import com.axiastudio.zoefx.core.db.Manager;
 import com.axiastudio.zoefx.core.model.beans.EntityBuilder;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.List;
-
-import static org.junit.Assert.*;
 
 public class JPAManagerImplTest {
 
@@ -46,7 +43,7 @@ public class JPAManagerImplTest {
     public static void setUpClass() throws Exception {
         JPADatabaseImpl db = new JPADatabaseImpl();
         db.open("testPU");
-        Utilities.registerUtility(db, Database.class);
+        IOC.registerUtility(db, Database.class);
         Manager<Author> manager = db.createManager(Author.class);
         Author lev = EntityBuilder.create(Author.class).set("id", 1L).set("name", "Lev").set("surname", "Tolstoj").build();
         manager.save(lev);
@@ -58,13 +55,13 @@ public class JPAManagerImplTest {
 
     @After
     public void tearDown() throws Exception {
-        Database db = Utilities.queryUtility(Database.class);
+        Database db = IOC.queryUtility(Database.class);
         Manager<Author> manager = db.createManager(Author.class);
     }
 
     @Test
     public void testLimit() throws Exception {
-        Database db = Utilities.queryUtility(Database.class);
+        Database db = IOC.queryUtility(Database.class);
         Manager<Author> manager = db.createManager(Author.class);
         assert manager.query().size() == 3;
         assert manager.query(2).size() == 2;
@@ -72,7 +69,7 @@ public class JPAManagerImplTest {
 
     @Test
     public void testOderBy() throws Exception {
-        Database db = Utilities.queryUtility(Database.class);
+        Database db = IOC.queryUtility(Database.class);
         Manager<Author> manager = db.createManager(Author.class);
         assert "Gabriel García".equals(manager.query("name").get(0).name);
         assert "Tolstoj".equals(manager.query("surname", Boolean.TRUE, 1).get(0).surname);
@@ -80,7 +77,7 @@ public class JPAManagerImplTest {
 
     @Test
     public void testPaging() throws Exception {
-        Database db = Utilities.queryUtility(Database.class);
+        Database db = IOC.queryUtility(Database.class);
         Manager<Author> manager = db.createManager(Author.class);
         List<Author> rs = manager.query("id", 2, 2); // second page (page size is 2)
         /*
