@@ -85,6 +85,7 @@ public class JPAManagerImpl<E> extends AbstractManager<E> implements Manager<E> 
         EntityManager em = getEntityManager();
         em.getTransaction().begin();
         E merged = em.merge(entity);
+        em.refresh(merged);
         em.getTransaction().commit();
         return merged;
     }
