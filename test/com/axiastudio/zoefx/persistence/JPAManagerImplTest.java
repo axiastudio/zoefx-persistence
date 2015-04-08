@@ -30,7 +30,7 @@ package com.axiastudio.zoefx.persistence;
 import com.axiastudio.zoefx.core.IOC;
 import com.axiastudio.zoefx.core.db.Database;
 import com.axiastudio.zoefx.core.db.Manager;
-import com.axiastudio.zoefx.core.model.beans.EntityBuilder;
+import com.axiastudio.zoefx.core.beans.EntityBuilder;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
