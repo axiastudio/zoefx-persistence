@@ -6,7 +6,7 @@
 
     <groupId>com.axiastudio</groupId>
     <artifactId>zoefx-persistence</artifactId>
-    <version>0.2-SNAPSHOT</version>
+    <version>0.2.0</version>
 
     <build>
         <plugins>
@@ -27,7 +27,7 @@
         <dependency>
             <groupId>com.axiastudio</groupId>
             <artifactId>zoefx-core</artifactId>
-            <version>0.2-SNAPSHOT</version>
+            <version>0.2.0</version>
         </dependency>
 
         <dependency>
@@ -40,6 +40,13 @@
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <version>1.4.186</version>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
         </dependency>
 
     </dependencies>
