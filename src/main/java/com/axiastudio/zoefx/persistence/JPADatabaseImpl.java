@@ -78,7 +78,7 @@ public class JPADatabaseImpl implements Database {
      */
     @Override
     public <E> Manager<E> createManager(Class<E> klass){
-        JPAManagerImpl<E> manager = new JPAManagerImpl(getEntityManagerFactory().createEntityManager(), klass);
+        JPAManagerImpl<E> manager = new JPAManagerImpl(getEntityManagerFactory(), klass);
         return manager;
     }
 
@@ -91,9 +91,7 @@ public class JPADatabaseImpl implements Database {
      */
     @Override
     public <E> Manager<E> createManager(Class<E> klass, Manager<?> parentManager) {
-        JPAManagerImpl parentJpaManager = (JPAManagerImpl) parentManager;
-        EntityManager entityManager = parentJpaManager.getEntityManager();
-        JPAManagerImpl<E> manager = new JPAManagerImpl(entityManager, klass);
+        JPAManagerImpl<E> manager = new JPAManagerImpl(((JPAManagerImpl) parentManager).getEntityManagerFactory(), klass);
         return manager;
     }
 }
