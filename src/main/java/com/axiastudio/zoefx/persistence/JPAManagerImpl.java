@@ -35,6 +35,7 @@ import com.axiastudio.zoefx.core.db.Database;
 import com.axiastudio.zoefx.core.db.Manager;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.lang.annotation.Annotation;
@@ -51,16 +52,22 @@ import java.util.*;
 public class JPAManagerImpl<E> extends AbstractManager<E> implements Manager<E> {
 
     private Class<E> entityClass;
-    private EntityManager entityManager;
+    private EntityManager entityManager=null;
+    private EntityManagerFactory entityManagerFactory=null;
 
-    public JPAManagerImpl(EntityManager em, Class<E> klass) {
+    public JPAManagerImpl(EntityManagerFactory emf, Class<E> klass) {
+        this(emf, klass, null);
+    }
+
+    public JPAManagerImpl(EntityManagerFactory emf, Class<E> klass, EntityManager em) {
         entityClass = klass;
+        entityManagerFactory = emf;
         entityManager = em;
     }
 
     @Override
     public Object getId(E entity) {
-        return entityManager.getEntityManagerFactory().getPersistenceUnitUtil().getIdentifier(entity);
+        return entityManagerFactory.getPersistenceUnitUtil().getIdentifier(entity);
     }
 
     @Override
@@ -87,43 +94,47 @@ public class JPAManagerImpl<E> extends AbstractManager<E> implements Manager<E> 
     @Override
     public E save(E entity) {
         parentize(entity);
-        EntityManager em = getEntityManager();
+        EntityManager em = createEntityManager();
         em.getTransaction().begin();
         E merged = em.merge(entity);
         em.getTransaction().commit();
         em.refresh(merged);
+        finalizeEntityManager(em);
         return merged;
     }
 
     @Override
     public void save(List<E> entities) {
-        EntityManager em = getEntityManager();
+        EntityManager em = createEntityManager();
         em.getTransaction().begin();
         for( E entity: entities ){
             em.merge(entity);
         }
         em.getTransaction().commit();
+        finalizeEntityManager(em);
     }
 
     @Override
     public void delete(E entity) {
-        EntityManager em = getEntityManager();
+        EntityManager em = createEntityManager();
         em.getTransaction().begin();
         E merged = em.merge(entity);
         em.remove(merged);
         em.getTransaction().commit();
+        finalizeEntityManager(em);
     }
 
     @Override
     public void deleteRow(Object row) {
-        EntityManager em = getEntityManager();
+        EntityManager em = createEntityManager();
         Object merged = em.merge(row);
         em.remove(merged);
+        finalizeEntityManager(em);
     }
 
     @Override
     public void truncate(){
-        EntityManager em = getEntityManager();
+        EntityManager em = createEntityManager();
         em.getTransaction().begin();
         em.createQuery("DELETE FROM " + entityClass.getCanonicalName() + " e").executeUpdate();
         em.getTransaction().commit();
@@ -131,25 +142,28 @@ public class JPAManagerImpl<E> extends AbstractManager<E> implements Manager<E> 
 
     @Override
     public E get(Long id) {
-        EntityManager em = getEntityManager();
-        return em.find(entityClass, id);
+        EntityManager em = createEntityManager();
+        E entity = em.find(entityClass, id);
+        finalizeEntityManager(em);
+        return entity;
     }
 
     @Override
     public List<E> query() {
-        EntityManager em = getEntityManager();
+        EntityManager em = createEntityManager();
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<E> cq = cb.createQuery(entityClass);
         Root<E> root = cq.from(entityClass);
         cq.select(root);
         TypedQuery<E> query = em.createQuery(cq);
         List<E> store = query.getResultList();
+        finalizeEntityManager(em);
         return store;
     }
 
     @Override
     public List<E> query(Map<String, Object> map, List<String> orderbys, List<Boolean> reverses, Integer size, Integer startindex) {
-        EntityManager em = getEntityManager();
+        EntityManager em = createEntityManager();
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<E> cq = cb.createQuery(entityClass);
         Root<E> root = cq.from(entityClass);
@@ -157,7 +171,7 @@ public class JPAManagerImpl<E> extends AbstractManager<E> implements Manager<E> 
         for( String name: map.keySet() ){
             Predicate predicate=null;
             Path path = null;
-            path = root.get(name);
+            path = root.get(name.split("#")[0]);
             Object objectValue = map.get(name);
             if( objectValue instanceof String ){
                 String value = (String) objectValue;
@@ -169,11 +183,40 @@ public class JPAManagerImpl<E> extends AbstractManager<E> implements Manager<E> 
             } else if( objectValue instanceof Boolean ){
                 predicate = cb.equal(path, objectValue);
             } else if( objectValue instanceof List ){
+                /*
                 List<Date> range = (List<Date>) objectValue;
                 Date from = zeroMilliseconds(range.get(0));
                 Date to = lastMillisecond(range.get(1));
                 predicate = cb.and(cb.greaterThanOrEqualTo(path, from),
                         cb.lessThanOrEqualTo(path, to));
+                        */
+
+                List<Object> range = (List<Object>) objectValue;
+                if( range.get(0) instanceof Operator){
+                    Operator op = (Operator) range.get(0);
+                    Object value = range.get(1);
+                    if( Operator.eq.equals(op) ){
+                        predicate = cb.equal(path, value);
+                    } else if( value instanceof Comparable ) {
+                        if( value instanceof Date ){
+                            if( Operator.lt.equals(op) || Operator.le.equals(op) ){
+                                value = lastMillisecond((Date) range.get(1));
+                            } else if ( Operator.gt.equals(op) || Operator.ge.equals(op) ){
+                                value = zeroMilliseconds((Date) range.get(1));
+                            }
+                        }
+                        if (Operator.lt.equals(op)) {
+                            predicate = cb.lessThan(path, (Comparable) value);
+                        } else if (Operator.le.equals(op)) {
+                            predicate = cb.lessThanOrEqualTo(path, (Comparable) value);
+                        } else if (Operator.gt.equals(op)) {
+                            predicate = cb.greaterThan(path, (Comparable) value);
+                        } else if (Operator.ge.equals(op)) {
+                            predicate = cb.greaterThanOrEqualTo(path, (Comparable) value);
+                        }
+                    }
+                }
+
             } else if( objectValue instanceof Object ){
                 if( objectValue.getClass().isEnum() ) {
                     int value = ((Enum) objectValue).ordinal(); // XXX: and if EnumType.STRING??
@@ -219,6 +262,7 @@ public class JPAManagerImpl<E> extends AbstractManager<E> implements Manager<E> 
             query = query.setMaxResults(size.intValue());
         }
         List<E> store = query.getResultList();
+        finalizeEntityManager(em);
         return store;
     }
 
@@ -242,14 +286,37 @@ public class JPAManagerImpl<E> extends AbstractManager<E> implements Manager<E> 
         return calendar.getTime();
     }
 
-    protected EntityManager getEntityManager() {
+    protected EntityManager createEntityManager() {
+        if( entityManager!=null ){
+            return entityManager;
+        }
+        return entityManagerFactory.createEntityManager();
+    }
+
+    private void finalizeEntityManager(EntityManager em) {
+        if( em != entityManager ) {
+            em.close();
+        } else {
+            System.out.println("***");
+        }
+    }
+
+    public EntityManagerFactory getEntityManagerFactory() {
+        return entityManagerFactory;
+    }
+
+    public EntityManager getEntityManager() {
         return entityManager;
     }
 
+    public void setEntityManager(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
+
     /*
-     * The parentize method hooks the items of the collections to the parent
-     * entity.
-     */
+             * The parentize method hooks the items of the collections to the parent
+             * entity.
+             */
     private void parentize(E entity){
         for(Field f: entityClass.getDeclaredFields()){
             for( Annotation a: f.getAnnotations()){
