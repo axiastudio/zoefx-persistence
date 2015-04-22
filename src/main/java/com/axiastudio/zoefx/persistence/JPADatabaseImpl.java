@@ -43,6 +43,15 @@ import java.util.Map;
 public class JPADatabaseImpl implements Database {
 
     private EntityManagerFactory entityManagerFactory;
+    private Boolean entityManagerSingleton=true;
+
+    public JPADatabaseImpl() {
+        this(Boolean.TRUE);
+    }
+
+    public JPADatabaseImpl(Boolean entityManagerSingleton) {
+        this.entityManagerSingleton = entityManagerSingleton;
+    }
 
     public EntityManagerFactory getEntityManagerFactory() {
         return entityManagerFactory;
@@ -78,8 +87,10 @@ public class JPADatabaseImpl implements Database {
      */
     @Override
     public <E> Manager<E> createManager(Class<E> klass){
-        JPAManagerImpl<E> manager = new JPAManagerImpl(getEntityManagerFactory(), klass);
-        return manager;
+        if( entityManagerSingleton ) {
+            return new JPAManagerImpl(getEntityManagerFactory(), klass, getEntityManagerFactory().createEntityManager());
+        }
+        return new JPAManagerImpl(getEntityManagerFactory(), klass);
     }
 
     /**
@@ -91,7 +102,7 @@ public class JPADatabaseImpl implements Database {
      */
     @Override
     public <E> Manager<E> createManager(Class<E> klass, Manager<?> parentManager) {
-        JPAManagerImpl<E> manager = new JPAManagerImpl(((JPAManagerImpl) parentManager).getEntityManagerFactory(), klass);
+        JPAManagerImpl<E> manager = new JPAManagerImpl(((JPAManagerImpl) parentManager).getEntityManagerFactory(), klass, ((JPAManagerImpl) parentManager).getEntityManager());
         return manager;
     }
 }

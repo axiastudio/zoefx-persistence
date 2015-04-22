@@ -52,11 +52,17 @@ import java.util.*;
 public class JPAManagerImpl<E> extends AbstractManager<E> implements Manager<E> {
 
     private Class<E> entityClass;
+    private EntityManager entityManager=null;
     private EntityManagerFactory entityManagerFactory=null;
 
     public JPAManagerImpl(EntityManagerFactory emf, Class<E> klass) {
+        this(emf, klass, null);
+    }
+
+    public JPAManagerImpl(EntityManagerFactory emf, Class<E> klass, EntityManager em) {
         entityClass = klass;
         entityManagerFactory = emf;
+        entityManager = em;
     }
 
     @Override
@@ -281,21 +287,36 @@ public class JPAManagerImpl<E> extends AbstractManager<E> implements Manager<E> 
     }
 
     protected EntityManager createEntityManager() {
+        if( entityManager!=null ){
+            return entityManager;
+        }
         return entityManagerFactory.createEntityManager();
     }
 
     private void finalizeEntityManager(EntityManager em) {
-        em.close();
+        if( em != entityManager ) {
+            em.close();
+        } else {
+            System.out.println("***");
+        }
     }
 
     public EntityManagerFactory getEntityManagerFactory() {
         return entityManagerFactory;
     }
 
+    public EntityManager getEntityManager() {
+        return entityManager;
+    }
+
+    public void setEntityManager(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
+
     /*
-         * The parentize method hooks the items of the collections to the parent
-         * entity.
-         */
+             * The parentize method hooks the items of the collections to the parent
+             * entity.
+             */
     private void parentize(E entity){
         for(Field f: entityClass.getDeclaredFields()){
             for( Annotation a: f.getAnnotations()){
